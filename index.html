@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>周期行业景气度跟踪</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #e0e0e0;
+            --accent-blue: #1890ff;
+            --accent-green: #52c41a;
+            --accent-red: #ff4d4f;
+            --accent-yellow: #faad14;
+            --accent-purple: #722ed1;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .header-date {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+        
+        .refresh-btn {
+            background: var(--accent-blue);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: opacity 0.2s;
+            box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
+        }
+        
+        .refresh-btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Tabs */
+        .tabs-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: all 0.2s;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        
+        .tab:hover {
+            color: var(--text-primary);
+        }
+        
+        .tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+        
+        /* Content */
+        .content {
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Overview Grid */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        
+        .overview-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .overview-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .card-industry-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .card-level-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .card-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .card-score {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .score-number {
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        
+        .score-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .card-wow {
+            font-size: 13px;
+        }
+        
+        .sparkline {
+            height: 60px;
+            margin-top: 8px;
+        }
+        
+        /* Industry Tab Content */
+        .industry-content {
+            display: none;
+        }
+        
+        .industry-content.active {
+            display: block;
+        }
+        
+        .summary-box {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-left: 3px solid;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .summary-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        
+        .summary-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+        
+        /* KPI Cards */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        .kpi-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .kpi-unit {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-left: 4px;
+        }
+        
+        .kpi-changes {
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .chart-panel {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        
+        /* Metrics Table */
+        .metrics-table-container {
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-top: 24px;
+        }
+        
+        .metrics-table-header {
+            padding: 12px 20px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .metrics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        
+        .metrics-table thead {
+            background: #f8f9fa;
+        }
+        
+        .metrics-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .metrics-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+        
+        .metrics-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .metrics-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .metric-category {
+            font-weight: 600;
+            font-size: 13px;
+            width: 60px;
+            border-right: 2px solid #f0f0f0;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .metric-unit {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .metric-time {
+            color: #999;
+            font-size: 12px;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            color: #1f2937;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .metric-frequency {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .metric-wow, .metric-yoy, .metric-5year-avg {
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .chart-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1f2937;
+        }
+        
+        .chart-type-switch {
+            display: flex;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            padding: 2px;
+        }
+        
+        .chart-radio {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .chart-radio-label {
+            padding: 4px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 3px;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+        
+        .chart-radio-label:hover {
+            color: var(--text-primary);
+        }
+        
+        .chart-radio-label.active {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+        
+        /* Error */
+        .error {
+            text-align: center;
+            padding: 60px;
+            color: var(--accent-red);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="header-title">周期行业景气度跟踪</h1>
+        <div class="header-right">
+            <span class="header-date" id="updateTime"></span>
+            <button class="refresh-btn" onclick="location.reload()">🔄 刷新数据</button>
+        </div>
+    </div>
+    
+    <div class="tabs-container">
+        <div class="tabs" id="tabs"></div>
+    </div>
+    
+    <div class="content" id="content">
+        <div class="loading">加载中...</div>
+    </div>
+
+    <script src="data.js"></script>
+    <script>
+        // 全局变量
+        let currentTab = '总览';
+        let chartInstances = {};
+        
+        // 季节图颜色方案
+        const YEAR_COLORS = [
+            '#2d3a4a', '#3a4f6e', '#4c6a8f', '#5a85b0',
+            '#6fa3d0', '#85bde3', '#f0a500', '#ff7733',
+        ];
+        const CURRENT_YEAR_COLOR = '#ff6b35';
+        
+        // 初始化
+        function init() {
+            document.getElementById('updateTime').textContent = 
+                '更新时间: ' + new Date().toLocaleDateString('zh-CN');
+            
+            if (typeof INDUSTRY_DATA === 'undefined') {
+                document.getElementById('content').innerHTML = 
+                    '<div class="error">数据加载失败，请检查 data.js 是否存在</div>';
+                return;
+            }
+            
+            renderTabs();
+            renderContent();
+        }
+        
+        // 渲染Tab导航
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            const industries = ['总览', ...INDUSTRY_DATA.industries];
+            
+            tabsContainer.innerHTML = industries.map(ind => `
+                <button class="tab ${ind === currentTab ? 'active' : ''}" 
+                        onclick="switchTab('${ind}')">
+                    ${ind}
+                </button>
+            `).join('');
+        }
+        
+        // 切换Tab
+        function switchTab(tab) {
+            currentTab = tab;
+            renderTabs();
+            renderContent();
+        }
+        
+        // 渲染内容
+        function renderContent() {
+            const content = document.getElementById('content');
+            
+            // 销毁旧图表
+            Object.values(chartInstances).forEach(chart => chart.dispose());
+            chartInstances = {};
+            
+            if (currentTab === '总览') {
+                renderOverview(content);
+            } else {
+                renderIndustry(content, currentTab);
+            }
+        }
+        
+        // 渲染总览页
+        function renderOverview(container) {
+            const cards = INDUSTRY_DATA.industries.map(industry => {
+                const data = INDUSTRY_DATA.industryData[industry];
+                const wow = data.scoreWow;
+                const wowStr = wow !== null ? (wow >= 0 ? '+' : '') + wow.toFixed(1) : '--';
+                const wowColor = wow !== null ? (wow >= 0 ? '#98c379' : '#e06c75') : '#666';
+                
+                return `
+                    <div class="overview-card" 
+                         style="border-left-color: ${data.color}"
+                         onclick="switchTab('${industry}')">
+                        <div class="card-header">
+                            <span class="card-industry-name">${industry}</span>
+                            <span class="card-level-badge" 
+                                  style="background-color: ${data.levelColor}">
+                                ${data.prosperityLevel}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-score">
+                                <span class="score-number" style="color: ${data.color}">
+                                    ${data.currentScore !== null ? data.currentScore.toFixed(1) : '--'}
+                                </span>
+                                <span class="score-label">景气指数</span>
+                            </div>
+                            <div class="card-wow">
+                                <span style="color: #666">周环比: </span>
+                                <span style="color: ${wowColor}; font-weight: bold">${wowStr}</span>
+                            </div>
+                        </div>
+                        <div class="sparkline" id="sparkline-${industry}"></div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = `<div class="overview-grid">${cards}</div>`;
+            
+            // 渲染sparkline
+            INDUSTRY_DATA.industries.forEach(industry => {
+                renderSparkline(industry);
+            });
+        }
+        
+        // 渲染Sparkline
+        function renderSparkline(industry) {
+            const data = INDUSTRY_DATA.industryData[industry];
+            const container = document.getElementById(`sparkline-${industry}`);
+            if (!container || !data.scoreHistory || data.scoreHistory.length === 0) return;
+            
+            const chart = echarts.init(container);
+            const xData = data.scoreHistory.map(d => d.date);
+            const yData = data.scoreHistory.map(d => d.value);
+            
+            const option = {
+                grid: { top: 0, bottom: 0, left: 0, right: 0 },
+                xAxis: { type: 'category', data: xData, show: false },
+                yAxis: { type: 'value', min: 0, max: 100, show: false },
+                tooltip: { show: false },
+                series: [{
+                    type: 'line',
+                    data: yData,
+                    smooth: true,
+                    symbol: 'none',
+                    lineStyle: { color: data.color, width: 1.5 },
+                    areaStyle: {
+                        color: {
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: data.color + '40' },
+                                { offset: 1, color: data.color + '10' }
+                            ]
+                        }
+                    }
+                }]
+            };
+            
+            chart.setOption(option);
+            chartInstances[`sparkline-${industry}`] = chart;
+        }
+        
+        // 渲染行业详情页
+        function renderIndustry(container, industry) {
+            const data = INDUSTRY_DATA.industryData[industry];
+            
+            // 摘要
+            const summaryHtml = `
+                <div class="summary-box" style="border-left-color: ${data.color}">
+                    <div class="summary-title">本周观点</div>
+                    <p class="summary-text">${data.summaryText}</p>
+                </div>
+            `;
+            
+            // 图表（放在前面）
+            const chartsHtml = data.charts.map(chart => `
+                <div class="chart-panel">
+                    <div class="chart-header">
+                        <span class="chart-title">${chart.title}</span>
+                        <div class="chart-type-switch">
+                            <div class="chart-radio">
+                                <span class="chart-radio-label ${chart.defaultType === 'trend' ? 'active' : ''}"
+                                      onclick="switchChartType('${industry}', '${chart.id}', 'trend')">趋势图</span>
+                                <span class="chart-radio-label ${chart.defaultType === 'seasonal' ? 'active' : ''}"
+                                      onclick="switchChartType('${industry}', '${chart.id}', 'seasonal')">季节图</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container" id="chart-${industry}-${chart.id}"></div>
+                </div>
+            `).join('');
+            
+            // 指标表格（PDF中展示的所有指标）
+            let currentCategory = '';
+            const tableRows = data.tableMetrics.map(metric => {
+                const valStr = metric.currentValue !== null 
+                    ? (Math.abs(metric.currentValue) >= 100 ? metric.currentValue.toLocaleString() : metric.currentValue.toFixed(2))
+                    : '--';
+                
+                const wowStr = metric.wow !== null 
+                    ? (metric.wow >= 0 ? '+' : '') + (metric.wow * 100).toFixed(1) + '%'
+                    : '--';
+                const wowColor = metric.wow !== null 
+                    ? ((metric.wow >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
+                    : '#999';
+                
+                const yoyStr = metric.yoy !== null 
+                    ? (metric.yoy >= 0 ? '+' : '') + (metric.yoy * 100).toFixed(1) + '%'
+                    : '--';
+                const yoyColor = metric.yoy !== null 
+                    ? ((metric.yoy >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
+                    : '#999';
+                
+                const vs5YearAvgStr = metric.vs5YearAvg !== null 
+                    ? (metric.vs5YearAvg >= 0 ? '+' : '') + (metric.vs5YearAvg * 100).toFixed(1) + '%'
+                    : '--';
+                const vs5YearAvgColor = metric.vs5YearAvg !== null 
+                    ? ((metric.vs5YearAvg >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
+                    : '#999';
+                
+                // 如果分类变化，显示分类标签
+                const categoryCell = metric.category !== currentCategory 
+                    ? `<td class="metric-category" style="color: ${data.color}; font-weight: 600;">${metric.category}</td>`
+                    : '<td class="metric-category"></td>';
+                currentCategory = metric.category;
+                
+                return `
+                    <tr>
+                        ${categoryCell}
+                        <td class="metric-label">${metric.label}</td>
+                        <td class="metric-unit">${metric.unit}</td>
+                        <td class="metric-frequency">${metric.frequency || '--'}</td>
+                        <td class="metric-time">${metric.updateTime || '--'}</td>
+                        <td class="metric-value">${valStr}</td>
+                        <td class="metric-wow" style="color: ${wowColor}">${wowStr}</td>
+                        <td class="metric-yoy" style="color: ${yoyColor}">${yoyStr}</td>
+                        <td class="metric-5year-avg" style="color: ${vs5YearAvgColor}">${vs5YearAvgStr}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            const tableHtml = `
+                <div class="metrics-table-container">
+                    <div class="metrics-table-header" style="background-color: ${data.color}">
+                        <span>${industry}行业主要指标</span>
+                    </div>
+                    <table class="metrics-table">
+                        <thead>
+                            <tr>
+                                <th>类别</th>
+                                <th>指标名称</th>
+                                <th>单位</th>
+                                <th>频次</th>
+                                <th>更新时间</th>
+                                <th>最新值</th>
+                                <th>WoW</th>
+                                <th>YoY</th>
+                                <th>较五年同期</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            container.innerHTML = `
+                <div class="industry-content active">
+                    ${summaryHtml}
+                    <div class="charts-grid">${chartsHtml}</div>
+                    ${tableHtml}
+                </div>
+            `;
+            
+            // 渲染图表
+            data.charts.forEach(chart => {
+                renderChart(industry, chart, chart.defaultType);
+            });
+        }
+        
+        // 切换图表类型
+        function switchChartType(industry, chartId, type) {
+            const data = INDUSTRY_DATA.industryData[industry];
+            const chartData = data.charts.find(c => c.id === chartId);
+            if (chartData) {
+                chartData.currentType = type;
+                renderChart(industry, chartData, type);
+                
+                // 更新按钮状态
+                const panel = document.getElementById(`chart-${industry}-${chartId}`).closest('.chart-panel');
+                panel.querySelectorAll('.chart-radio-label').forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.textContent === (type === 'trend' ? '趋势图' : '季节图')) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+        }
+        
+        // 渲染图表
+        function renderChart(industry, chartData, type) {
+            const container = document.getElementById(`chart-${industry}-${chartData.id}`);
+            if (!container) return;
+            
+            const chartKey = `${industry}-${chartData.id}`;
+            if (chartInstances[chartKey]) {
+                chartInstances[chartKey].dispose();
+            }
+            
+            const chart = echarts.init(container);
+            const isSeasonal = type === 'seasonal';
+            
+            let option;
+            if (isSeasonal) {
+                option = buildSeasonalOption(chartData);
+            } else {
+                option = buildTrendOption(chartData);
+            }
+            
+            chart.setOption(option);
+            chartInstances[chartKey] = chart;
+        }
+        
+        // 构建趋势图配置
+        function buildTrendOption(chartData) {
+            const series = chartData.series.filter(s => s.data && s.data.length > 0);
+            const isDualAxis = chartData.dualAxis;
+            
+            const echartsSeries = series.map(s => ({
+                name: s.label,
+                type: 'line',
+                data: s.data.map(d => [d.date, (d.value * s.scale * chartData.unitScale).toFixed(2)]),
+                smooth: true,
+                symbol: 'none',
+                lineStyle: { color: s.color, width: 1.5 },
+                itemStyle: { color: s.color },
+                yAxisIndex: isDualAxis && s.axis === 'y2' ? 1 : 0,
+            }));
+            
+            const yAxisConfig = {
+                type: 'value',
+                scale: true,  // 不强制从0开始，自动缩放
+                axisLine: { lineStyle: { color: '#e0e0e0' } },
+                axisLabel: { color: '#666', fontSize: 11 },
+                splitLine: { lineStyle: { color: '#f0f0f0' } },
+                name: chartData.yaxis.title || '',
+                nameTextStyle: { color: '#666', fontSize: 11 }
+            };
+            
+            const yAxes = [yAxisConfig];
+            if (isDualAxis && chartData.yaxis2) {
+                yAxes.push({
+                    ...yAxisConfig,
+                    name: chartData.yaxis2.title || '',
+                    position: 'right',
+                    splitLine: { show: false }
+                });
+            }
+            
+            return {
+                backgroundColor: 'transparent',
+                grid: { top: 30, bottom: 60, left: 55, right: isDualAxis ? 55 : 15 },
+                legend: {
+                    data: series.map(s => s.label),
+                    bottom: 0,
+                    textStyle: { color: '#666', fontSize: 10 }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    borderColor: '#e0e0e0',
+                    textStyle: { color: '#333' }
+                },
+                dataZoom: [{
+                    type: 'inside',
+                    start: 0,
+                    end: 100
+                }, {
+                    type: 'slider',
+                    bottom: 25,
+                    height: 20,
+                    borderColor: '#e0e0e0',
+                    fillerColor: 'rgba(24, 144, 255, 0.2)',
+                    handleStyle: { color: '#1890ff' },
+                    textStyle: { color: '#666' }
+                }],
+                xAxis: {
+                    type: 'time',
+                    axisLine: { lineStyle: { color: '#e0e0e0' } },
+                    axisLabel: { color: '#666', fontSize: 11 },
+                    splitLine: { show: true, lineStyle: { color: '#f0f0f0' } }
+                },
+                yAxis: yAxes,
+                series: echartsSeries
+            };
+        }
+        
+        // 构建季节图配置
+        function buildSeasonalOption(chartData) {
+            const series = chartData.series.filter(s => s.data && s.data.length > 0);
+            const currentYear = new Date().getFullYear();
+            
+            const echartsSeries = [];
+            
+            series.forEach(s => {
+                // 按年份分组
+                const yearData = {};
+                s.data.forEach(d => {
+                    const date = new Date(d.date);
+                    const year = date.getFullYear();
+                    const mmdd = `2000-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    
+                    if (!yearData[year]) yearData[year] = [];
+                    yearData[year].push([mmdd, (d.value * s.scale * chartData.unitScale).toFixed(2)]);
+                });
+                
+                const years = Object.keys(yearData).sort();
+                const nYears = years.length;
+                
+                years.forEach((year, i) => {
+                    const isCurrent = parseInt(year) === currentYear;
+                    const colorIdx = Math.min(i, YEAR_COLORS.length - 1);
+                    const color = isCurrent ? CURRENT_YEAR_COLOR : YEAR_COLORS[colorIdx];
+                    const width = isCurrent ? 2.5 : 1.2;
+                    const opacity = isCurrent || i >= nYears - 3 ? 1.0 : 0.6;
+                    
+                    echartsSeries.push({
+                        name: year,
+                        type: 'line',
+                        data: yearData[year].sort((a, b) => new Date(a[0]) - new Date(b[0])),
+                        smooth: true,
+                        symbol: 'none',
+                        lineStyle: { color: color, width: width },
+                        itemStyle: { color: color },
+                        opacity: opacity
+                    });
+                });
+            });
+            
+            return {
+                backgroundColor: 'transparent',
+                grid: { top: 30, bottom: 60, left: 55, right: 15 },
+                legend: {
+                    bottom: 0,
+                    textStyle: { color: '#666', fontSize: 10 }
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255,255,255,0.95)',
+                    borderColor: '#e0e0e0',
+                    textStyle: { color: '#333' },
+                    formatter: function(params) {
+                        let result = '';
+                        params.forEach(p => {
+                            result += `${p.seriesName}: ${p.value[1]}<br/>`;
+                        });
+                        return result;
+                    }
+                },
+                xAxis: {
+                    type: 'time',
+                    min: '2000-01-01',
+                    max: '2000-12-31',
+                    axisLine: { lineStyle: { color: '#e0e0e0' } },
+                    axisLabel: { 
+                        color: '#666', 
+                        fontSize: 11,
+                        formatter: function(value) {
+                            const month = new Date(value).getMonth() + 1;
+                            return month + '月';
+                        }
+                    },
+                    splitLine: { show: true, lineStyle: { color: '#f0f0f0' } }
+                },
+                yAxis: {
+                    type: 'value',
+                    scale: true,  // 不强制从0开始，自动缩放
+                    axisLine: { lineStyle: { color: '#e0e0e0' } },
+                    axisLabel: { color: '#666', fontSize: 11 },
+                    splitLine: { lineStyle: { color: '#f0f0f0' } },
+                    name: chartData.yaxis.title || '',
+                    nameTextStyle: { color: '#666', fontSize: 11 }
+                },
+                series: echartsSeries
+            };
+        }
+        
+        // 窗口大小变化时重绘图表
+        window.addEventListener('resize', () => {
+            Object.values(chartInstances).forEach(chart => chart.resize());
+        });
+        
+        // 启动
+        init();
+    </script>
+</body>
+</html>
