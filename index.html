@@ -293,18 +293,24 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             margin-top: 24px;
         }
-        
+
         .metrics-table-header {
             padding: 12px 20px;
             color: #fff;
             font-size: 16px;
             font-weight: 600;
         }
-        
+
+        .metrics-table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         .metrics-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
+            min-width: 800px;
         }
         
         .metrics-table thead {
@@ -511,6 +517,185 @@
         .industry-summary {
             border-left: 4px solid;
         }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px 16px;
+            }
+
+            .header-title {
+                font-size: 18px;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .tabs-container {
+                padding: 0 12px;
+                overflow-x: auto;
+            }
+
+            .tabs {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+            }
+
+            .tab {
+                padding: 10px 14px;
+                font-size: 13px;
+                white-space: nowrap;
+            }
+
+            .content {
+                padding: 16px 12px;
+            }
+
+            .overview-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .overview-card {
+                padding: 16px;
+            }
+
+            .score-number {
+                font-size: 28px;
+            }
+
+            .summary-container {
+                padding: 14px;
+                margin-bottom: 16px;
+            }
+
+            .summary-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .timeline-slider {
+                width: 100%;
+                padding-bottom: 4px;
+            }
+
+            .timeline-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .summary-text {
+                font-size: 13px;
+                line-height: 1.7;
+            }
+
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .kpi-card {
+                padding: 12px;
+            }
+
+            .kpi-value {
+                font-size: 20px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .chart-panel {
+                padding: 12px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .chart-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .chart-title {
+                font-size: 13px;
+            }
+
+            /* 表格移动端适配 - 横向滚动 */
+            .metrics-table-container {
+                margin-top: 16px;
+            }
+
+            .metrics-table-header {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .metrics-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .metrics-table {
+                min-width: 700px;
+                font-size: 12px;
+            }
+
+            .metrics-table th,
+            .metrics-table td {
+                padding: 8px 10px;
+            }
+
+            .metric-category {
+                width: 50px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-title {
+                font-size: 16px;
+            }
+
+            .refresh-btn {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+
+            .tab {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .overview-card {
+                padding: 12px;
+            }
+
+            .card-industry-name {
+                font-size: 14px;
+            }
+
+            .score-number {
+                font-size: 24px;
+            }
+
+            .kpi-row {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 220px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -620,7 +805,7 @@
                                     ${timelineBtns}
                                 </div>
                             </div>
-                            <p class="summary-text" id="overview-summary-text">${latestSummary}</p>
+                            <p class="summary-text" id="overview-summary-text">${formatSummaryText(latestSummary)}</p>
                         </div>
                     `;
                 }
@@ -668,6 +853,13 @@
             });
         }
 
+        // 格式化总结文本（自动换行）
+        function formatSummaryText(text) {
+            if (!text) return '';
+            // 将 1）2）3）等分割成多行
+            return text.replace(/([1-9][）\)])/g, '<br><strong>$1</strong>').trim();
+        }
+
         // 选择总览日期
         function selectOverviewDate(date) {
             // 更新按钮状态
@@ -680,7 +872,7 @@
 
             // 更新总结文本
             const summary = HISTORICAL_SUMMARIES.overview[date];
-            document.getElementById('overview-summary-text').textContent = summary;
+            document.getElementById('overview-summary-text').innerHTML = formatSummaryText(summary);
         }
         
         // 渲染Sparkline
@@ -749,7 +941,7 @@
                                     ${timelineBtns}
                                 </div>
                             </div>
-                            <p class="summary-text" id="industry-summary-text-${industry}">${latestSummary}</p>
+                            <p class="summary-text" id="industry-summary-text-${industry}">${formatSummaryText(latestSummary)}</p>
                         </div>
                     `;
                 } else {
@@ -759,7 +951,7 @@
                             <div class="summary-header">
                                 <span class="summary-title">📊 行业观点</span>
                             </div>
-                            <p class="summary-text">${data.summaryText}</p>
+                            <p class="summary-text">${formatSummaryText(data.summaryText)}</p>
                         </div>
                     `;
                 }
@@ -769,7 +961,7 @@
                         <div class="summary-header">
                             <span class="summary-title">📊 行业观点</span>
                         </div>
-                        <p class="summary-text">${data.summaryText}</p>
+                        <p class="summary-text">${formatSummaryText(data.summaryText)}</p>
                     </div>
                 `;
             }
@@ -791,41 +983,50 @@
                     <div class="chart-container" id="chart-${industry}-${chart.id}"></div>
                 </div>
             `).join('');
-            
-            // 指标表格（PDF中展示的所有指标）
+
+            // 指标表格（PDF中展示的所有指标）- 支持单元格合并
+            // 先统计每个类别的行数
+            const categoryRowCounts = {};
+            data.tableMetrics.forEach(metric => {
+                categoryRowCounts[metric.category] = (categoryRowCounts[metric.category] || 0) + 1;
+            });
+
             let currentCategory = '';
+            let categoryRowspan = 0;
             const tableRows = data.tableMetrics.map(metric => {
-                const valStr = metric.currentValue !== null 
+                const valStr = metric.currentValue !== null
                     ? (Math.abs(metric.currentValue) >= 100 ? metric.currentValue.toLocaleString() : metric.currentValue.toFixed(2))
                     : '--';
-                
-                const wowStr = metric.wow !== null 
+
+                const wowStr = metric.wow !== null
                     ? (metric.wow >= 0 ? '+' : '') + (metric.wow * 100).toFixed(1) + '%'
                     : '--';
-                const wowColor = metric.wow !== null 
+                const wowColor = metric.wow !== null
                     ? ((metric.wow >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
                     : '#999';
-                
-                const yoyStr = metric.yoy !== null 
+
+                const yoyStr = metric.yoy !== null
                     ? (metric.yoy >= 0 ? '+' : '') + (metric.yoy * 100).toFixed(1) + '%'
                     : '--';
-                const yoyColor = metric.yoy !== null 
+                const yoyColor = metric.yoy !== null
                     ? ((metric.yoy >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
                     : '#999';
-                
-                const vs5YearAvgStr = metric.vs5YearAvg !== null 
+
+                const vs5YearAvgStr = metric.vs5YearAvg !== null
                     ? (metric.vs5YearAvg >= 0 ? '+' : '') + (metric.vs5YearAvg * 100).toFixed(1) + '%'
                     : '--';
-                const vs5YearAvgColor = metric.vs5YearAvg !== null 
+                const vs5YearAvgColor = metric.vs5YearAvg !== null
                     ? ((metric.vs5YearAvg >= 0) === (metric.direction > 0) ? '#52c41a' : '#ff4d4f')
                     : '#999';
-                
-                // 如果分类变化，显示分类标签
-                const categoryCell = metric.category !== currentCategory 
-                    ? `<td class="metric-category" style="color: ${data.color}; font-weight: 600;">${metric.category}</td>`
-                    : '<td class="metric-category"></td>';
-                currentCategory = metric.category;
-                
+
+                // 处理类别单元格合并
+                let categoryCell = '';
+                if (metric.category !== currentCategory) {
+                    currentCategory = metric.category;
+                    categoryRowspan = categoryRowCounts[metric.category];
+                    categoryCell = `<td class="metric-category" rowspan="${categoryRowspan}" style="color: ${data.color}; font-weight: 600; vertical-align: middle;">${metric.category}</td>`;
+                }
+
                 return `
                     <tr>
                         ${categoryCell}
@@ -846,24 +1047,26 @@
                     <div class="metrics-table-header" style="background-color: ${data.color}">
                         <span>${industry}行业主要指标</span>
                     </div>
-                    <table class="metrics-table">
-                        <thead>
-                            <tr>
-                                <th>类别</th>
-                                <th>指标名称</th>
-                                <th>单位</th>
-                                <th>频次</th>
-                                <th>更新时间</th>
-                                <th>最新值</th>
-                                <th>WoW</th>
-                                <th>YoY</th>
-                                <th>较五年同期</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${tableRows}
-                        </tbody>
-                    </table>
+                    <div class="metrics-table-wrapper">
+                        <table class="metrics-table">
+                            <thead>
+                                <tr>
+                                    <th>类别</th>
+                                    <th>指标名称</th>
+                                    <th>单位</th>
+                                    <th>频次</th>
+                                    <th>更新时间</th>
+                                    <th>最新值</th>
+                                    <th>WoW</th>
+                                    <th>YoY</th>
+                                    <th>较五年同期</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
             
@@ -1111,7 +1314,7 @@
 
             // 更新总结文本
             const summary = HISTORICAL_SUMMARIES.summaries[industry][date];
-            document.getElementById(`industry-summary-text-${industry}`).textContent = summary;
+            document.getElementById(`industry-summary-text-${industry}`).innerHTML = formatSummaryText(summary);
         }
 
         // 启动
