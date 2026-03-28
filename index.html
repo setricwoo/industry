@@ -856,8 +856,12 @@
         // 格式化总结文本（自动换行）
         function formatSummaryText(text) {
             if (!text) return '';
-            // 将 1）2）3）等分割成多行
-            return text.replace(/([1-9][）\)])/g, '<br><strong>$1</strong>').trim();
+            // 先去除原有换行和多余空白，再按 1）2）3）分割成多行
+            return text
+                .replace(/\s+/g, ' ')
+                .replace(/\s*([1-9][）\)])/g, '<br><strong>$1</strong>')
+                .trim()
+                .replace(/^<br>/, '');  // 移除开头的换行
         }
 
         // 选择总览日期
