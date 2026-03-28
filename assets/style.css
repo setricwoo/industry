@@ -1,0 +1,354 @@
+/* ─── 全局 ─── */
+:root {
+  --bg-primary: #1a1d27;
+  --bg-secondary: #1e2230;
+  --bg-card: #252a3a;
+  --bg-hover: #2d3346;
+  --border: #2d3748;
+  --text-primary: #abb2bf;
+  --text-bright: #e5e9f0;
+  --text-dim: #555e72;
+  --accent: #61afef;
+  --green: #98c379;
+  --red: #e06c75;
+  --yellow: #e5c07b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', sans-serif;
+  font-size: 13px;
+  margin: 0;
+}
+
+.app-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* ─── 顶部标题栏 ─── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-bright);
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-date {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.refresh-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+  background: var(--accent);
+  color: var(--bg-primary);
+}
+
+/* ─── Tab 导航 ─── */
+.main-tabs {
+  border-bottom: 1px solid var(--border) !important;
+  background: var(--bg-secondary);
+}
+
+.tab {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  color: var(--text-dim) !important;
+  padding: 10px 18px !important;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--text-primary) !important;
+}
+
+.tab-selected {
+  background: transparent !important;
+  border-bottom: 2px solid var(--accent) !important;
+  color: var(--accent) !important;
+  font-weight: 500;
+}
+
+/* ─── Tab 内容区 ─── */
+.tab-content {
+  padding: 16px 20px;
+  min-height: calc(100vh - 100px);
+}
+
+/* ─── 总览网格 ─── */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 700px) {
+  .overview-grid { grid-template-columns: 1fr; }
+}
+
+/* ─── 总览卡片 ─── */
+.overview-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 14px 16px 6px;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+  border-left-width: 4px !important;
+}
+
+.overview-card:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.card-industry-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.card-level-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.card-score {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.score-number {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.card-wow {
+  font-size: 12px;
+  text-align: right;
+}
+
+/* ─── 行业详情页 ─── */
+.industry-tab-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 正文摘要 */
+.summary-box {
+  background: var(--bg-card);
+  border-radius: 6px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+}
+
+.summary-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-text {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--text-primary);
+}
+
+/* KPI 指标卡片 */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 900px) {
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border-radius: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+}
+
+.kpi-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.kpi-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-bright);
+}
+
+.kpi-unit {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.kpi-changes {
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+/* 图表网格 */
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .charts-grid { grid-template-columns: 1fr; }
+}
+
+.chart-cell {
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.chart-panel {
+  height: 100%;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-bright);
+}
+
+/* 趋势/季节切换按钮 */
+.chart-type-switch {
+  display: flex;
+  gap: 4px;
+}
+
+.chart-radio {
+  display: flex;
+  gap: 6px;
+}
+
+.chart-radio-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+}
+
+.chart-radio-label:hover {
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.chart-radio-input:checked + .chart-radio-label {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: rgba(97, 175, 239, 0.1);
+}
+
+/* 隐藏原始 radio input */
+input[type="radio"].chart-radio-input {
+  display: none;
+}
+
+/* ─── Plotly 图表修复 ─── */
+.js-plotly-plot .plotly .modebar {
+  background: transparent !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn path {
+  fill: var(--text-dim);
+}
+
+.js-plotly-plot .plotly .modebar-btn:hover path {
+  fill: var(--text-primary);
+}
+
+/* rangeslider 样式 */
+.rangeslider-mask-min,
+.rangeslider-mask-max {
+  fill: rgba(0,0,0,0.5);
+}
+
+.rangeslider-slidebox {
+  fill: rgba(97, 175, 239, 0.05);
+  stroke: var(--accent);
+}
