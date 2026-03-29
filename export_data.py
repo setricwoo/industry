@@ -115,7 +115,7 @@ def main():
                 'yoy': None,
                 'vs5YearAvg': None,  # 较五年同期平均变化
                 'updateTime': None,
-                'frequency': None,
+                'frequency': metric.get('frequency', ''),  # 频次
             }
             
             if series_data is not None and len(series_data) > 0:
